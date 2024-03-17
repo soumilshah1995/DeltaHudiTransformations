@@ -275,9 +275,13 @@ print("ORDER complete ")
 ```
 
 # Step 2: upload the Jar files into S3 into folder jar/
+
+
 * commander-1.78.jar
 * hudi-spark3.3-bundle_2.12-0.14.0.jar
 * hudi-utilities-slim-bundle_2.12-0.14.0.jar
+
+
 Link : https://drive.google.com/drive/folders/1Rs9243i-D-jmFHPivlwdtODBRQpG1nys?usp=share_link
 
 # Step 3: Delta Streamer incremental ETL code 
