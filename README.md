@@ -280,6 +280,7 @@ print("ORDER complete ")
 * commander-1.78.jar
 * hudi-spark3.3-bundle_2.12-0.14.0.jar
 * hudi-utilities-slim-bundle_2.12-0.14.0.jar
+![1710599139513](https://github.com/soumilshah1995/DeltaHudiTransformations/assets/39345855/ec2ea0d1-240b-4971-a24c-dec2313d25f5)
 
 
 Link : https://drive.google.com/drive/folders/1Rs9243i-D-jmFHPivlwdtODBRQpG1nys?usp=share_link
@@ -349,7 +350,7 @@ object GlueApp {
 
 ##### Make sure to add jar path 
 
-![1710599139513](https://github.com/soumilshah1995/DeltaHudiTransformations/assets/39345855/ec2ea0d1-240b-4971-a24c-dec2313d25f5)
+![image](https://github.com/soumilshah1995/DeltaHudiTransformations/assets/39345855/69492139-c034-4a07-8c88-8827ac5fb0c2)
 
 # Run the job 
 
