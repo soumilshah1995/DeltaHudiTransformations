@@ -353,6 +353,9 @@ object GlueApp {
 
 ```
 # Backfilling jobs
+
+![1710849924713](https://github.com/soumilshah1995/DeltaHudiTransformations/assets/39345855/8b25c6da-16eb-4e7e-aa41-c5a84be04856)
+
 ```
 import com.amazonaws.services.glue.GlueContext
 import com.amazonaws.services.glue.MappingSpec
