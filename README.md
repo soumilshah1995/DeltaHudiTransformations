@@ -309,8 +309,8 @@ object GlueApp {
     val args = GlueArgParser.getResolvedOptions(sysArgs, Seq("JOB_NAME").toArray)
     println(s"GLue Args $args")
 
-    val BUCKET = "<BUCKET GOES HERE>"
-    val SqlQuery = "SELECT a.order_id, a.customer_id, a.product_id, a.order_date, c.name as customer_name, c.email as customer_email FROM <SRC> a LEFT JOIN testdb.customers c ON a.customer_id = c.customer_id;"
+    val BUCKET = "XX"
+    val SqlQuery = "SELECT a.order_id, a.customer_id, a.product_id, a.order_date,a.quantity,a.total_price,c.name as customer_name, c.email as customer_email FROM <SRC> a LEFT JOIN testdb.customers c ON a.customer_id = c.customer_id;"
 
     println(s"SQL QUERY $SqlQuery")
 
@@ -321,11 +321,78 @@ object GlueApp {
       "--source-ordering-field", "order_date",
       s"--target-base-path", s"s3://$BUCKET/silver/",
       "--target-table", "orders",
-      "--transformer-class","org.apache.hudi.utilities.transform.SqlQueryBasedTransformer",
       "--table-type", "COPY_ON_WRITE",
+      "--transformer-class", "org.apache.hudi.utilities.transform.SqlQueryBasedTransformer",
+      "--hoodie-conf", s"hoodie.deltastreamer.transformer.sql=$SqlQuery",
       s"--hoodie-conf", s"hoodie.streamer.source.hoodieincr.path=s3://$BUCKET/bronze/table_name=orders/",
       "--hoodie-conf", "hoodie.streamer.source.hoodieincr.missing.checkpoint.strategy=READ_UPTO_LATEST_COMMIT",
-      "--hoodie-conf", s"hoodie.deltastreamer.transformer.sql=$SqlQuery"
+      "--hoodie-conf", "hoodie.datasource.write.recordkey.field=order_id",
+      "--hoodie-conf", "hoodie.datasource.write.precombine.field=order_date",
+      "--hoodie-conf", "hoodie.datasource.write.partitionpath.field=order_date",
+
+    )
+
+    val cfg = HoodieStreamer.getConfig(config)
+    val additionalSparkConfigs = SchedulerConfGenerator.getSparkSchedulingConfigs(cfg)
+    val jssc = UtilHelpers.buildSparkContext("delta-streamer-test", "jes", additionalSparkConfigs)
+    val spark = jssc.sc
+
+    val glueContext: GlueContext = new GlueContext(spark)
+    Job.init(args("JOB_NAME"), glueContext, args.asJava)
+
+    try {
+      new HoodieStreamer(cfg, jssc).sync()
+    } finally {
+      jssc.stop()
+    }
+
+    Job.commit()
+  }
+}
+
+
+```
+# Backfilling jobs
+```
+import com.amazonaws.services.glue.GlueContext
+import com.amazonaws.services.glue.MappingSpec
+import com.amazonaws.services.glue.errors.CallSite
+import com.amazonaws.services.glue.util.GlueArgParser
+import com.amazonaws.services.glue.util.Job
+import com.amazonaws.services.glue.util.JsonOptions
+import org.apache.spark.SparkContext
+import scala.collection.JavaConverters._
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.api.java.JavaSparkContext
+import org.apache.hudi.utilities.streamer.HoodieStreamer
+import org.apache.hudi.utilities.streamer.SchedulerConfGenerator
+import org.apache.hudi.utilities.UtilHelpers
+import com.beust.jcommander.JCommander
+import com.beust.jcommander.Parameter
+
+object GlueApp {
+
+  def main(sysArgs: Array[String]) {
+    val args = GlueArgParser.getResolvedOptions(sysArgs, Seq("JOB_NAME").toArray)
+    println(s"GLue Args $args")
+
+    val BUCKET = "XX"
+    val SqlQuery = "SELECT a.order_id, a.customer_id, a.product_id, a.order_date, a.quantity, a.total_price, 'test' AS customer_name, c.email AS customer_email FROM testdb.orders a LEFT JOIN testdb.customers c ON a.customer_id = c.customer_id WHERE a.order_date='2022-01-03' "
+
+    println(s"SQL QUERY $SqlQuery")
+
+    println(s"Hudi DeltaStreamer Bucket $BUCKET")
+
+    var config = Array(
+      "--source-class", "org.apache.hudi.utilities.sources.SqlSource",
+      "--source-ordering-field", "order_date",
+      s"--target-base-path", s"s3://$BUCKET/silver/",
+      "--target-table", "orders",
+      "--table-type", "COPY_ON_WRITE",
+      "--hoodie-conf", s"hoodie.deltastreamer.source.sql.sql.query=$SqlQuery",
+      "--hoodie-conf", "hoodie.datasource.write.recordkey.field=order_id",
+      "--hoodie-conf", "hoodie.datasource.write.precombine.field=order_date",
+      "--hoodie-conf", "hoodie.datasource.write.partitionpath.field=order_date"
     )
 
     val cfg = HoodieStreamer.getConfig(config)
@@ -347,6 +414,7 @@ object GlueApp {
 }
 
 ```
+
 
 ##### Make sure to add jar path 
 
