@@ -352,9 +352,22 @@ object GlueApp {
 
 
 ```
+
+##### Make sure to add jar path 
+
+![image](https://github.com/soumilshah1995/DeltaHudiTransformations/assets/39345855/69492139-c034-4a07-8c88-8827ac5fb0c2)
+
+# Run the job 
+
+
 # Backfilling jobs
 
+
+
 ![1710849924713](https://github.com/soumilshah1995/DeltaHudiTransformations/assets/39345855/8b25c6da-16eb-4e7e-aa41-c5a84be04856)
+
+
+
 
 ```
 import com.amazonaws.services.glue.GlueContext
@@ -419,11 +432,7 @@ object GlueApp {
 ```
 
 
-##### Make sure to add jar path 
 
-![image](https://github.com/soumilshah1995/DeltaHudiTransformations/assets/39345855/69492139-c034-4a07-8c88-8827ac5fb0c2)
-
-# Run the job 
 
 
 
